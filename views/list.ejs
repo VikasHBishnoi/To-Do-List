@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-do List</title>
+</head>
+<body>
+    <h1 style="color:navy"><%=kindOfDay%> Todo list</h1>
+    <ul>
+        <li>Eat Food</li>
+        <li>Code </li>
+        <li>Sleep</li>
+        <li>Repeat</li>
+        <!-- <li><%=newListItem%></li> -->
+        <% for(var i=0;i<newListItem.length;i++){%>
+            <li><%=newListItem[i]%></li>
+        <%}%>
+    </ul>
+    <form action="/" method="post">
+        <input type="text" name="newItem" id="" placeholder="Add a new Item">
+        <button type="submit" value="Submit">Add It</button>
+    </form>
+</body>
+</html>
+
+<!-- Just for refernce how to use conditinal here and no other logic can render only if -->
+<!-- <% if(kindOfDay==="Saturday" ||kindOfDay==="Sunday"){ %>
+    <h1 style="color:green"><%=kindOfDay%> Todo list</h1>
+<% }else{ %>
+    <h1 style="color:navy"><%=kindOfDay%> Todo list</h1>
+<% } %> -->
