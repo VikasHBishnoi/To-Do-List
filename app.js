@@ -2,39 +2,88 @@ const express=require("express");
 const bodyParser=require("body-parser");
 const path=__dirname;
 const date=require(path+"/date.js");
+const mongoose=require("mongoose");
 // console.log(date.getDate());
 
 const app=express()
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'))
-const items=[];
-const work=[];
+
+mongoose.connect("mongodb://127.0.0.1:27017/todolistDB",{ useNewUrlParser: true, useUnifiedTopology: true });
+const itemsSchema={
+    name:String
+};
+const Item=mongoose.model("Item",itemsSchema);
+
+const todo1=new Item({
+    name:"LeetCode"
+});
+const todo2=new Item({
+    name:"Potd"
+});
+const defualtItems=[todo1,todo2];
+// Item.insertMany(defualtItems)
+//     .then(msg => {
+//         console.log(msg);
+//     })
+//     .catch(err => {
+//         console.log(err);
+//     });
+
 app.get("/",function(req,res){
     let day=date.getDate();
     let dayeeeee=date.getDay();
-    res.render("list", {listTitle:day,newListItem:items});
+    Item.find().select('name -_id')
+        .then(msg => {
+            // console.log(msg[1]['name']);
+            var arr=[];
+            msg.forEach(element => {
+                arr.push(element['name']);
+            });
+            res.render("list", {listTitle:day,newListItem:arr});
+            console.log("Succesully find");
+        })
+        .catch(err => {
+            console.log(err);
+        });
 });
-app.get('/work',function(req,res){
-    res.render("list",{listTitle:"work List",newListItem:work})
-});
+// app.get('/work',function(req,res){
+//     res.render("list",{listTitle:"work List",newListItem:work})
+// });
 app.post('/',function(req,res){
     item=req.body.newItem;
     console.log(req.body.list);
     // if(req.body.list)
-    console.log(typeof(req.body.list));
-    if(req.body.list==='work List'){
-        if(item!=""){
-            work.push(item);
-        }
-        res.redirect('/work');
-    }
-    else{
-        if(item!=""){
-            items.push(item);
-        }
-        res.redirect('/');
-    }
+    const addel=new Item({
+        name:item
+    });
+    addel.save();
+    res.redirect('/');
+    // or we can do below
+    // const defualtItems=[addel];
+    // Item.insertMany(addel)
+    //     .then(msg =>{
+    //         console.log("success added");
+    //         res.redirect('/');
+    //     })
+    //     .catch( err=>{
+    //         console.log("Erro");
+    //     })
+    // console.log(typeof(req.body.list));
+
+    // if(req.body.list==='work List'){
+    //     if(item!=""){
+    //         work.push(item);
+    //     }
+    //     res.redirect('/work');
+    // }
+    // else{
+    //     if(item!=""){
+    //         items.push(item);
+    //     }
+    //     res.redirect('/');
+    // }
 });
 app.listen(3000,function(){
     console.log("Server started on port 3000")
