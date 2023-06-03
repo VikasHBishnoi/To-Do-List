@@ -94,17 +94,38 @@ app.post('/',function(req,res){
 });
 
 app.post('/delete',function(req,res){
-    console.log(req.body);
+    const nameofpage=req.body.title;
     const id=req.body.checkbox;
-    Item.deleteOne({_id:id})
+    console.log(req.body);
+    console.log("Id "+id);
+    List.findOne({name:nameofpage})
         .then(msg =>{
-            console.log("Hurra")
-            console.log(msg);
-            res.redirect('/');
+            if(msg===null){
+                Item.deleteOne({_id:id})
+                    .then(msg =>{
+                        console.log("deleted item");
+                        res.redirect('/');
+                    })
+                    .catch(err =>{
+                        console.log(err);
+                    });
+            }
+            else{
+                List.findOneAndUpdate({name:nameofpage},{$pull:{items:{_id:id}}})
+                    .then(msg=>{
+                        console.log("yes");
+                        res.redirect('/'+nameofpage);
+                    })
+                    .catch(err=>{
+                        console.log("Again error");
+                    })
+
+            }
         })
-        .catch(err =>{
+        .catch(err=>{
             console.log(err);
         });
+    
 });
 app.get('/:customurl',function(req,res){
     const customListName=req.params.customurl;
