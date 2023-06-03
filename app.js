@@ -34,14 +34,10 @@ const defualtItems=[todo1,todo2];
 app.get("/",function(req,res){
     let day=date.getDate();
     let dayeeeee=date.getDay();
-    Item.find().select('name -_id')
+    Item.find().select('name')
         .then(msg => {
             // console.log(msg[1]['name']);
-            var arr=[];
-            msg.forEach(element => {
-                arr.push(element['name']);
-            });
-            res.render("list", {listTitle:day,newListItem:arr});
+            res.render("list", {listTitle:day,newListItem:msg});
             console.log("Succesully find");
         })
         .catch(err => {
@@ -60,31 +56,26 @@ app.post('/',function(req,res){
     });
     addel.save();
     res.redirect('/');
-    // or we can do below
-    // const defualtItems=[addel];
-    // Item.insertMany(addel)
-    //     .then(msg =>{
-    //         console.log("success added");
-    //         res.redirect('/');
-    //     })
-    //     .catch( err=>{
-    //         console.log("Erro");
-    //     })
-    // console.log(typeof(req.body.list));
-
-    // if(req.body.list==='work List'){
-    //     if(item!=""){
-    //         work.push(item);
-    //     }
-    //     res.redirect('/work');
-    // }
-    // else{
-    //     if(item!=""){
-    //         items.push(item);
-    //     }
-    //     res.redirect('/');
-    // }
 });
+
+app.post('/delete',function(req,res){
+    console.log(req.body.checkbox);
+    const id=req.body.checkbox;
+    Item.deleteOne({_id:id})
+        .then(msg =>{
+            console.log("Hurra")
+            console.log(msg);
+            res.redirect('/');
+        })
+        .catch(err =>{
+            console.log(err);
+        });
+});
+app.get('/:para',function(req,res){
+    const customListNmae=req.params;
+    res.send(req.params.para);
+});
+
 app.listen(3000,function(){
     console.log("Server started on port 3000")
 });
