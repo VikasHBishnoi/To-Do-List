@@ -15,6 +15,11 @@ const itemsSchema={
     name:String
 };
 const Item=mongoose.model("Item",itemsSchema);
+const listSchema={
+    name:String,
+    items:[itemsSchema]
+};
+const List=mongoose.model("List",listSchema);
 
 const todo1=new Item({
     name:"LeetCode"
@@ -34,7 +39,7 @@ const defualtItems=[todo1,todo2];
 app.get("/",function(req,res){
     let day=date.getDate();
     let dayeeeee=date.getDay();
-    Item.find().select('name')
+    Item.find()
         .then(msg => {
             // console.log(msg[1]['name']);
             res.render("list", {listTitle:day,newListItem:msg});
@@ -50,16 +55,46 @@ app.get("/",function(req,res){
 app.post('/',function(req,res){
     item=req.body.newItem;
     console.log(req.body.list);
-    // if(req.body.list)
-    const addel=new Item({
-        name:item
-    });
-    addel.save();
-    res.redirect('/');
+    const nameofpage=req.body.list;
+    List.findOne({name:nameofpage})
+        .then(msg =>{
+            if(msg===null){
+                const addel=new Item({
+                    name:item
+                });
+                addel.save();
+                console.log(nameofpage);
+                res.redirect('/');
+            }
+            else{
+                // var arr=msg.items;
+                const addel=new Item({
+                    name:item
+                });
+                msg.items.push(addel)
+                // console.log(arr);
+                msg.save();
+                res.redirect('/'+nameofpage);
+                // or below can also do but above is nice and good way
+                // List.updateOne({name:nameofpage}, {items:arr})
+                //     .then(msg=>{
+                //         console.log("ssa");
+                //         res.redirect('/'+nameofpage);
+                //     })
+                //     .catch(err=>{
+                //         console.log(err);
+                //         res.send("S");
+                //     });
+                // const t=msg.name;
+            }
+        })
+        .catch(err=>{
+            console.log(err);
+        });
 });
 
 app.post('/delete',function(req,res){
-    console.log(req.body.checkbox);
+    console.log(req.body);
     const id=req.body.checkbox;
     Item.deleteOne({_id:id})
         .then(msg =>{
@@ -71,9 +106,33 @@ app.post('/delete',function(req,res){
             console.log(err);
         });
 });
-app.get('/:para',function(req,res){
-    const customListNmae=req.params;
-    res.send(req.params.para);
+app.get('/:customurl',function(req,res){
+    const customListName=req.params.customurl;
+    List.findOne({name:customListName})
+        .then(msg =>{
+            if(msg===null){
+                console.log("nullee");
+                const list=new List({
+                    name:customListName,
+                    items:defualtItems
+                });
+                list.save()
+                    .then(msg=>{
+                        res.redirect('/'+customListName);
+                    })
+                    .catch(err=>{
+                        console.log("Error in saving of new file");
+                    })
+            }
+            else{
+                console.log(msg.name);
+                // const t=msg.name;
+                res.render("list", {listTitle:msg.name,newListItem:msg.items});
+            }
+        })
+        .catch(err=>{
+            console.log(err);
+        });
 });
 
 app.listen(3000,function(){
